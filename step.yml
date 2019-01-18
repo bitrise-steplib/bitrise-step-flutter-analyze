@@ -10,10 +10,6 @@ type_tags:
 project_type_tags:
   - flutter
 
-is_requires_admin_user: true
-is_always_run: false
-is_skippable: false
-
 toolkit:
   go:
     package_name: github.com/bitrise-steplib/bitrise-step-flutter-analyze
@@ -27,6 +23,6 @@ inputs:
       is_required: true
   - additional_params: 
     opts:
-      title: "Additional parameters"
+      title: "Additional Parameters"
       summary: "The flags from this input field will be appended to the `flutter analyze` command."
       description: "The flags from this input field will be appended to the `flutter analyze` command."
