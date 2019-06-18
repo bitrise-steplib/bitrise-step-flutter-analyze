@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 
 	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/errorutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	shellquote "github.com/kballard/go-shellquote"
@@ -36,15 +38,29 @@ func main() {
 	log.Infof("Running analyze")
 
 	analyzeCmd := command.New("flutter", append([]string{"analyze"}, additionalParams...)...).
-		SetStdout(os.Stdout).
-		SetStderr(os.Stderr).
 		SetDir(cfg.ProjectLocation)
 
 	fmt.Println()
 	log.Donef("$ %s", analyzeCmd.PrintableCommandArgs())
 	fmt.Println()
 
-	if err := analyzeCmd.Run(); err != nil {
+	out, err := analyzeCmd.RunAndReturnTrimmedCombinedOutput()
+	if err != nil {
+		if errorutil.IsExitStatusError(err) {
+			// example: error • Undefined class 'function' • lib/package.dart:3:1 • undefined_class
+			analyzeErrorPattern := regexp.MustCompile(`error.+\.dart.\s*`)
+			if !analyzeErrorPattern.MatchString(out) {
+				// false positive, no error in analyze output
+				// flutter analyze returns with nonzero for 'info'
+				// level errors, see: https://github.com/flutter/flutter/issues/20855
+				log.Printf(out)
+				os.Exit(0)
+			}
+		}
+
+		log.Printf(out)
 		failf("Running command failed, error: %s", err)
 	}
+
+	log.Printf(out)
 }
