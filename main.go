@@ -22,6 +22,16 @@ func failf(msg string, args ...interface{}) {
 	os.Exit(1)
 }
 
+func hasAnalyzeError(cmdOutput string) bool {
+	// example: error • Undefined class 'function' • lib/package.dart:3:1 • undefined_class
+	analyzeErrorPattern := regexp.MustCompile(`error.+\.dart.\s*`)
+	if analyzeErrorPattern.MatchString(cmdOutput) {
+		return true
+	}
+
+	return false
+}
+
 func main() {
 	var cfg config
 	if err := stepconf.Parse(&cfg); err != nil {
@@ -47,12 +57,9 @@ func main() {
 	out, err := analyzeCmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
 		if errorutil.IsExitStatusError(err) {
-			// example: error • Undefined class 'function' • lib/package.dart:3:1 • undefined_class
-			analyzeErrorPattern := regexp.MustCompile(`error.+\.dart.\s*`)
-			if !analyzeErrorPattern.MatchString(out) {
-				// false positive, no error in analyze output
-				// flutter analyze returns with nonzero for 'info'
-				// level errors, see: https://github.com/flutter/flutter/issues/20855
+			if !hasAnalyzeError(out) {
+				// false positive, flutter analyze returns with nonzero for
+				// 'info' level errors, see: https://github.com/flutter/flutter/issues/20855
 				log.Printf(out)
 				os.Exit(0)
 			}
