@@ -24,7 +24,7 @@ func failf(msg string, args ...interface{}) {
 
 func hasAnalyzeError(cmdOutput string) bool {
 	// example: error • Undefined class 'function' • lib/package.dart:3:1 • undefined_class
-	analyzeErrorPattern := regexp.MustCompile(`error.+\.dart.\s*`)
+	analyzeErrorPattern := regexp.MustCompile(`error.+\.dart:\d+:\d+`)
 	if analyzeErrorPattern.MatchString(cmdOutput) {
 		return true
 	}
