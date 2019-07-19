@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 
 	"github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-io/go-utils/errorutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	shellquote "github.com/kballard/go-shellquote"
@@ -47,27 +48,23 @@ func main() {
 	fmt.Println()
 	log.Infof("Running analyze")
 
+	var b bytes.Buffer
+	multiwr := io.MultiWriter(os.Stdout, &b)
 	analyzeCmd := command.New("flutter", append([]string{"analyze"}, additionalParams...)...).
-		SetDir(cfg.ProjectLocation)
+		SetDir(cfg.ProjectLocation).
+		SetStdout(multiwr).
+		SetStderr(os.Stderr)
 
 	fmt.Println()
 	log.Donef("$ %s", analyzeCmd.PrintableCommandArgs())
 	fmt.Println()
-
-	out, err := analyzeCmd.RunAndReturnTrimmedCombinedOutput()
-	if err != nil {
-		if errorutil.IsExitStatusError(err) {
-			if !hasAnalyzeError(out) {
-				// false positive, flutter analyze returns with nonzero for
-				// 'info' level errors, see: https://github.com/flutter/flutter/issues/20855
-				log.Printf(out)
-				os.Exit(0)
-			}
-		}
-
-		log.Printf(out)
-		failf("Running command failed, error: %s", err)
+	
+	if err := analyzeCmd.Run(); err != nil {
+		log.Errorf("Error running flutter analyze: %s", err)
+		os.Exit(1)
 	}
 
-	log.Printf(out)
+	if hasAnalyzeError(b.String()) {
+		os.Exit(1)
+	}
 }
