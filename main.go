@@ -61,7 +61,7 @@ func main() {
 	
 	if err := analyzeCmd.Run(); err != nil {
 		if hasAnalyzeError(b.String()) {
-			log.Errorf("Error running flutter analyze: %s", err)
+			log.Errorf("flutter analyze found errors: %s", err)
 			os.Exit(1)
 		}
 	}
