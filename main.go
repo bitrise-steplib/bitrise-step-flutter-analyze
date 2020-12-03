@@ -40,7 +40,7 @@ func failf(msg string, args ...interface{}) {
 }
 
 func constructRegex(severityPattern string) *regexp.Regexp {
-	pattern := fmt.Sprintf(`^%s.+\.dart:\d+:\d+`, severityPattern)
+	pattern := fmt.Sprintf(`^%s .+\.dart:\d+:\d+`, severityPattern)
 	return regexp.MustCompile(pattern)
 }
 
