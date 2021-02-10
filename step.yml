@@ -10,9 +10,9 @@ description: |-
 
      By default, you do not have to change this.
   
-  2. Set the **Fail Severity** input to the minimum level that should make the step fail.
+  2. Set the **Fail Severity** input to the minimum level that should make the Step fail.
 
-     By default, the step fails on errors only. For example, you can set it to warning to make the step fail on both analyze errors and analyze warnings.
+     By default, the Step fails on errors only. For example, you can set it to warning to make the Step fail on both analyze errors and analyze warnings.
 
   3. Add any flags you want to the `flutter analyze` command in the **Additional Parameters** input.
 
@@ -50,8 +50,8 @@ inputs:
   - fail_severity: "error"
     opts:
       title: "Fail Severity"
-      summary: "The minimum severity to fail the step, any issue with a severity at least as high as the specified one will make the step fail."
-      description: "The minimum severity to fail the step, any issue with a severity at least as high as the specified one will make the step fail."
+      summary: "The minimum severity to fail the Step. Any issue with a severity at least as high as the specified one will make the Step fail."
+      description: "The minimum severity to fail the Step. Any issue with a severity at least as high as the specified one will make the Step fail."
       is_required: true
       value_options:
         - "error"
