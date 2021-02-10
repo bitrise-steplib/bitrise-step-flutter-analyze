@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
@@ -13,10 +14,18 @@ import (
 	shellquote "github.com/kballard/go-shellquote"
 )
 
+const (
+	errorLevel   = "error"
+	warningLevel = "warning"
+	infoLevel    = "info"
+
+	newLine = "\n"
+)
+
 var severityRegExp = map[string]string{
-	"error":   "error",
-	"warning": "(error|warning)",
-	"info":    "(error|warning|info)",
+	errorLevel:   "error",
+	warningLevel: "(error|warning)",
+	infoLevel:    "(error|warning|info)",
 }
 
 type config struct {
@@ -30,17 +39,27 @@ func failf(msg string, args ...interface{}) {
 	os.Exit(1)
 }
 
+func constructRegex(severityPattern string) *regexp.Regexp {
+	pattern := fmt.Sprintf(`^%s .+\.dart:\d+:\d+`, severityPattern)
+	return regexp.MustCompile(pattern)
+}
+
 func hasAnalyzeError(cmdOutput string, failSeverity string) bool {
 	// example: error • Undefined class 'function' • lib/package.dart:3:1 • undefined_class
-	severityPattern := severityRegExp[failSeverity]
-	pattern := fmt.Sprintf(`%s.+\.dart:\d+:\d+`, severityPattern)
-	analyzeErrorPattern := regexp.MustCompile(pattern)
-	return analyzeErrorPattern.MatchString(cmdOutput)
+	outputLines := strings.Split(cmdOutput, newLine)
+	analyzeErrorPattern := constructRegex(severityRegExp[failSeverity])
+
+	for _, line := range outputLines {
+		if analyzeErrorPattern.MatchString(strings.TrimSpace(line)) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func hasOtherError(cmdOutput string) bool {
-	analyzeErrorPattern := regexp.MustCompile(`(error|warning|info).+\.dart:\d+:\d+`)
-	return !analyzeErrorPattern.MatchString(cmdOutput)
+	return !hasAnalyzeError(cmdOutput, infoLevel)
 }
 
 func main() {
