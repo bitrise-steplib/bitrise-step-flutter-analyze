@@ -65,13 +65,13 @@ func hasOtherError(cmdOutput string) bool {
 func main() {
 	var cfg config
 	if err := stepconf.Parse(&cfg); err != nil {
-		failf("Issue with input: %s", err)
+		failf("Process config: failed to parse step inputs: %s", err)
 	}
 	stepconf.Print(cfg)
 
 	additionalParams, err := shellquote.Split(cfg.AdditionalParams)
 	if err != nil {
-		failf("Failed to parse additional parameters, error: %s", err)
+		failf("Process config: failed to parse additional parameters: %s", err)
 	}
 
 	fmt.Println()
@@ -90,10 +90,9 @@ func main() {
 
 	if err := analyzeCmd.Run(); err != nil {
 		if hasAnalyzeError(b.String(), cfg.FailSeverity) {
-			log.Errorf("flutter analyze found errors: %s", err)
-			os.Exit(1)
+			failf("Run: flutter analyze found errors: %s", err)
 		} else if hasOtherError(b.String()) {
-			failf("step failed with error: %s", err)
+			failf("Run: step failed with error: %s", err)
 		}
 	}
 }
