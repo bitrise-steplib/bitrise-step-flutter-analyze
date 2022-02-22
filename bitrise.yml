@@ -43,7 +43,7 @@ workflows:
     - script:
         title: Clone sample app
         inputs:
-        - content: git clone $SAMPLE_APP_URL -b manual .
+        - content: git clone $SAMPLE_APP_URL -b main .
     - flutter-installer:
     - path::./:
 
