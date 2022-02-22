@@ -8,10 +8,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
-	"github.com/bitrise-tools/go-steputils/stepconf"
-	shellquote "github.com/kballard/go-shellquote"
+	"github.com/kballard/go-shellquote"
 )
 
 const (
